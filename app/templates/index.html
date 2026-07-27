@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f1eb" />
+    <meta name="description" content="咳辨：面向中医学习者的咳嗽辨证逻辑可视化教学系统。" />
+    <meta property="og:title" content="咳辨 · 中医咳嗽辨证逻辑可视化教学系统" />
+    <meta property="og:description" content="把症状、病位、证型、病机与教材代表方串成一条可复核的教学路径。" />
+    <meta property="og:image" content="{{ request.url.scheme }}://{{ request.url.netloc }}{{ url_for('static', path='og.png') }}" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="{{ request.url.scheme }}://{{ request.url.netloc }}{{ url_for('static', path='og.png') }}" />
+    <title>咳辨 · 中医咳嗽辨证逻辑可视化教学系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-lockup">
+          <div class="brand-seal" aria-hidden="true"><span>咳</span></div>
+          <div>
+            <div class="eyebrow">中医辨证思维教学工具</div>
+            <div class="brand-name">咳辨 <span>· Cough Atlas</span></div>
+          </div>
+        </div>
+        <div class="topbar-meta">
+          <div class="engine-status"><span class="status-dot"></span><span id="engine-status-text">规则引擎在线</span></div>
+          <div class="topbar-divider"></div>
+          <div class="case-id">SESSION <span id="session-id">C-0726</span></div>
+          <button class="icon-button" id="knowledge-button" type="button" aria-label="查看知识范围">?</button>
+        </div>
+      </header>
+
+      <main class="main-grid">
+        <aside class="case-column">
+          <section class="panel case-panel">
+            <div class="panel-heading">
+              <div>
+                <div class="section-kicker">01 / CASE INPUT</div>
+                <h1>建立一份病例</h1>
+              </div>
+              <span class="panel-count">咳嗽专域</span>
+            </div>
+
+            <div class="field-block">
+              <div class="field-label-row">
+                <label for="symptom-input">主要症状</label>
+                <span class="field-hint">可输入多项</span>
+              </div>
+              <div class="tag-editor" id="tag-editor">
+                <div class="tag-list" id="tag-list"></div>
+                <input id="symptom-input" type="text" autocomplete="off" placeholder="例如：痰黄黏稠" />
+                <button class="add-tag-button" id="add-tag" type="button" aria-label="添加症状">＋</button>
+              </div>
+              <div class="quick-tags" id="quick-tags">
+                <button type="button" data-symptom="咳嗽">咳嗽</button>
+                <button type="button" data-symptom="痰多">痰多</button>
+                <button type="button" data-symptom="口渴">口渴</button>
+                <button type="button" data-symptom="咽干">咽干</button>
+              </div>
+            </div>
+
+            <div class="field-block">
+              <div class="field-label-row"><label for="tongue">舌象</label><span class="field-hint">可留空</span></div>
+              <input class="text-input" id="tongue" type="text" placeholder="例如：舌红，苔黄腻" />
+            </div>
+
+            <div class="field-block">
+              <div class="field-label-row"><label for="pulse">脉象</label><span class="field-hint">可留空</span></div>
+              <input class="text-input" id="pulse" type="text" placeholder="例如：脉滑数" />
+            </div>
+
+            <div class="field-block">
+              <div class="field-label-row"><label for="other-information">其他表现</label><span class="field-hint">病程 / 诱因 / 兼症</span></div>
+              <textarea class="text-area" id="other-information" rows="3" placeholder="例如：受凉后起病 5 天，晨起咳嗽较重"></textarea>
+            </div>
+
+            <div class="action-row">
+              <button class="button button-primary" id="run-analysis" type="button"><span>开始推演</span><span class="button-arrow">→</span></button>
+              <button class="button button-quiet" id="reset-case" type="button">重置</button>
+            </div>
+
+            <div class="notice-box">
+              <span class="notice-mark">i</span>
+              <p>本系统仅用于中医辨证思维教学，不用于患者自诊或实际处方。</p>
+            </div>
+          </section>
+
+          <section class="panel examples-panel">
+            <div class="panel-heading compact">
+              <div>
+                <div class="section-kicker">QUICK START</div>
+                <h2>演示病例</h2>
+              </div>
+              <button class="text-button" id="refresh-examples" type="button">换一组</button>
+            </div>
+            <div class="example-list" id="example-list">
+              <div class="skeleton-line"></div>
+              <div class="skeleton-line short"></div>
+              <div class="skeleton-line"></div>
+            </div>
+          </section>
+
+          <section class="mini-legend">
+            <div><span class="legend-dot cinnabar"></span>规则命中</div>
+            <div><span class="legend-dot jade"></span>补充证据</div>
+            <div><span class="legend-dot ink"></span>教学结论</div>
+          </section>
+        </aside>
+
+        <section class="logic-column">
+          <div class="logic-heading">
+            <div>
+              <div class="section-kicker">02 / REASONING PATH</div>
+              <h2>五节点辨证路径</h2>
+              <p>从可见证据出发，沿着病位、病性与鉴别路径逐层收束。</p>
+            </div>
+            <div class="logic-summary">
+              <span class="summary-label">当前状态</span>
+              <strong id="analysis-state">待输入病例</strong>
+            </div>
+          </div>
+
+          <div class="logic-canvas">
+            <div class="flow-line" aria-hidden="true"></div>
+            <div class="node-list" id="node-list">
+              <button class="logic-node active" data-node="1" type="button">
+                <span class="node-index">01</span>
+                <span class="node-icon">◎</span>
+                <span class="node-copy"><strong>症状信息</strong><small>完整度与危险信号</small></span>
+                <span class="node-chevron">›</span>
+              </button>
+              <button class="logic-node" data-node="2" type="button">
+                <span class="node-index">02</span>
+                <span class="node-icon">◒</span>
+                <span class="node-copy"><strong>病位 · 病性</strong><small>多项表现共同指向</small></span>
+                <span class="node-chevron">›</span>
+              </button>
+              <button class="logic-node" data-node="3" type="button">
+                <span class="node-index">03</span>
+                <span class="node-icon">⌁</span>
+                <span class="node-copy"><strong>鉴别排除</strong><small>保留最多三条路径</small></span>
+                <span class="node-chevron">›</span>
+              </button>
+              <button class="logic-node" data-node="4" type="button">
+                <span class="node-index">04</span>
+                <span class="node-icon">✦</span>
+                <span class="node-copy"><strong>证型 · 病机 · 治法</strong><small>结论与不确定性</small></span>
+                <span class="node-chevron">›</span>
+              </button>
+              <button class="logic-node" data-node="5" type="button">
+                <span class="node-index">05</span>
+                <span class="node-icon">◈</span>
+                <span class="node-copy"><strong>方剂配伍</strong><small>教材代表方逻辑</small></span>
+                <span class="node-chevron">›</span>
+              </button>
+            </div>
+            <div class="path-caption"><span class="path-rule"></span><span>RULE-BASED · STRUCTURED · TRACEABLE</span><span class="path-rule"></span></div>
+          </div>
+
+          <div class="lower-rail">
+            <div class="rail-card">
+              <div class="rail-icon">⌘</div>
+              <div><span class="rail-label">推演原则</span><strong>硬规则先行</strong><p>模型只负责解释，不越过知识库边界。</p></div>
+            </div>
+            <div class="rail-card">
+              <div class="rail-icon">!</div>
+              <div><span class="rail-label">安全边界</span><strong>危险信号优先</strong><p>触发提醒时，代表方自动置空。</p></div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="insight-column">
+          <section class="panel insight-panel">
+            <div class="insight-topline">
+              <div class="section-kicker">03 / TEACHING LENS</div>
+              <span class="mode-pill" id="mode-pill">MOCK MODE</span>
+            </div>
+            <div class="insight-title-row">
+              <div>
+                <h2 id="insight-title">症状与信息完整度</h2>
+                <p id="insight-subtitle">先从病例中提取可见证据</p>
+              </div>
+              <span class="node-badge" id="node-badge">NODE 01</span>
+            </div>
+            <div id="insight-content" class="insight-content">
+              <div class="empty-insight">
+                <div class="empty-mark">◌</div>
+                <h3>等待一份病例</h3>
+                <p>选择左侧演示病例，或输入症状后开始推演。每个节点都会保留“为什么”。</p>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </main>
+
+      <div class="warning-banner" id="warning-banner" hidden>
+        <div class="warning-symbol">!</div>
+        <div><strong>识别到需要优先评估的危险信号</strong><span id="warning-text">请及时进行正规医学评估。当前内容仅保留教学型辨证展示。</span></div>
+        <button id="dismiss-warning" type="button" aria-label="关闭提醒">×</button>
+      </div>
+
+      <div class="modal-backdrop" id="knowledge-modal" hidden>
+        <div class="knowledge-modal" role="dialog" aria-modal="true" aria-labelledby="knowledge-title">
+          <button class="modal-close" id="close-modal" type="button" aria-label="关闭">×</button>
+          <div class="section-kicker">KNOWLEDGE SCOPE</div>
+          <h2 id="knowledge-title">咳嗽 · 八类证型</h2>
+          <p>规则知识库只用于教学推演，模型不可越界新增证型、方剂或剂量。</p>
+          <div class="syndrome-grid" id="syndrome-grid"></div>
+        </div>
+      </div>
+    </div>
+    <script src="{{ url_for('static', path='app.js') }}"></script>
+  </body>
+</html>
